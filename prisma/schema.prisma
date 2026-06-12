@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id String @id @default(cuid())
+
+  githubUrl String
+  name      String
+
+  chunks Chunk[]
+  chats  Chat[]
+
+  createdAt DateTime @default(now())
+}
+
+model Chunk {
+  id String @id @default(cuid())
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  content String @db.Text
+
+  embedding Json
+}
+
+model Chat {
+  id String @id @default(cuid())
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  title String
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id String @id @default(cuid())
+
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  role String
+
+  content String @db.Text
+
+  createdAt DateTime @default(now())
+}
